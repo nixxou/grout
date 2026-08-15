@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	DefaultRomPageSize           = 1000
+	DefaultRomPageSize           = 250
 	MaxConcurrentPlatformFetches = 10
 )
 
@@ -174,9 +174,9 @@ func (cm *Manager) fetchPlatformGames(platform romm.Platform, opts *fetchOpts) (
 		client = romm.NewClientFromHost(cm.host, cm.config.GetApiTimeout())
 	}
 
-	var allGames []romm.Rom
 	offset := 0
 	expectedTotal := 0
+	totalSaved := 0
 
 	for {
 		q := romm.GetRomsQuery{
@@ -198,42 +198,50 @@ func (cm *Manager) fetchPlatformGames(platform romm.Platform, opts *fetchOpts) (
 
 		if offset == 0 {
 			expectedTotal = res.Total
-			// Pre-allocate the exact slice capacity to prevent memory spikes
-			allGames = make([]romm.Rom, 0, expectedTotal)
 		}
 
-		allGames = append(allGames, res.Items...)
+		// Persist each page before fetching the next one. Retaining every ROM for a
+		// platform here can exhaust 128MB handhelds, especially when WithFiles adds
+		// large nested payloads. SavePlatformGames already replaces rows per game,
+		// so page-sized transactions preserve both full and incremental semantics.
+		if len(res.Items) > 0 {
+			if err := cm.SavePlatformGames(platform.ID, res.Items); err != nil {
+				return 0, err
+			}
+			totalSaved += len(res.Items)
+		}
 
 		if opts.onProgress != nil && len(res.Items) > 0 {
 			opts.onProgress(len(res.Items))
 		}
 		if opts.onPctProgress != nil && expectedTotal > 0 {
-			pct := float64(len(allGames)) / float64(expectedTotal)
+			pct := float64(totalSaved) / float64(expectedTotal)
 			if pct > 1.0 {
 				pct = 1.0
 			}
 			opts.onPctProgress.Store(pct)
 		}
 
-		if len(allGames) >= expectedTotal || len(res.Items) == 0 || len(res.Items) < DefaultRomPageSize {
+		if (expectedTotal > 0 && totalSaved >= expectedTotal) || len(res.Items) == 0 || len(res.Items) < DefaultRomPageSize {
 			break
 		}
 
 		offset += len(res.Items)
+		runtime.GC()
 	}
 
 	if opts.updatedAfter != "" {
 		logger.Debug("Fetched updated platform games",
 			"platform", platform.Name,
-			"count", len(allGames),
+			"count", totalSaved,
 			"updated_after", opts.updatedAfter)
 	} else {
 		logger.Debug("Cached platform games",
 			"platform", platform.Name,
-			"count", len(allGames))
+			"count", totalSaved)
 	}
 
-	return len(allGames), cm.SavePlatformGames(platform.ID, allGames)
+	return totalSaved, nil
 }
 
 func (cm *Manager) fetchAndCacheCollectionsWithProgress(progress *atomic.Float64, progressStart, progressEnd float64) int {
