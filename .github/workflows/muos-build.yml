@@ -1,0 +1,40 @@
+name: Build muOS
+
+on:
+  workflow_dispatch:
+    inputs:
+      grout_version:
+        description: "Version string baked into the binary"
+        required: false
+        default: ""
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04-arm
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Task
+        uses: arduino/setup-task@v2
+        with:
+          version: 3.x
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build ARM64
+        run: task build:arm64
+        env:
+          GROUT_VERSION: ${{ inputs.grout_version }}
+
+      - name: Package muOS
+        run: task package:muos
+
+      - name: Upload Grout.muxapp
+        uses: actions/upload-artifact@v4
+        with:
+          name: Grout-muxapp
+          path: dist/Grout.muxapp
+          if-no-files-found: error
