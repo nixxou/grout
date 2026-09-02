@@ -28,7 +28,10 @@ func DownloadMissingForPlatform(config internal.Config, host romm.Host, platform
 	missing := missingGames(games, config)
 	if len(missing) == 0 {
 		gaba.ConfirmationMessage(
-			i18n.Localize(&goi18n.Message{ID: "download_missing_none", Other: "All games for {{.Name}} are already downloaded."}, map[string]interface{}{"Name": platform.Name}),
+			fmt.Sprintf(
+				i18n.Localize(&goi18n.Message{ID: "download_missing_none", Other: "All games for %s are already downloaded."}, nil),
+				platform.Name,
+			),
 			ContinueFooter(),
 			gaba.MessageOptions{},
 		)
@@ -36,7 +39,10 @@ func DownloadMissingForPlatform(config internal.Config, host romm.Host, platform
 	}
 
 	_, err := gaba.ConfirmationMessage(
-		i18n.Localize(&goi18n.Message{ID: "download_missing_confirm", Other: "Download {{.Count}} missing game(s) for {{.Name}}?"}, map[string]interface{}{"Count": len(missing), "Name": platform.Name}),
+		fmt.Sprintf(
+			i18n.Localize(&goi18n.Message{ID: "download_missing_confirm", Other: "Download %d missing game(s) for %s?"}, nil),
+			len(missing), platform.Name,
+		),
 		[]gaba.FooterHelpItem{
 			FooterCancel(),
 			{ButtonName: "X", HelpText: i18n.Localize(&goi18n.Message{ID: "button_confirm", Other: "Confirm"}, nil)},
