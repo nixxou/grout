@@ -1145,3 +1145,18 @@ other = "Taille : {{.Size}}"
 [update_up_to_date]
 hash = "sha1-a534c74416c491ff56e75a3335ea2ee9b4e5b4ad"
 other = "Vous avez la dernière version ({{.Version}})"
+
+[button_download_missing]
+other = "Télécharger manquants"
+
+[download_missing_confirm]
+other = "Télécharger %d jeu(x) manquant(s) pour %s ?"
+
+[download_missing_done]
+other = "%d jeu(x) sur %d téléchargé(s)."
+
+[download_missing_load_error]
+other = "Échec du chargement des jeux. Veuillez réessayer plus tard."
+
+[download_missing_none]
+other = "Tous les jeux de %s sont déjà téléchargés."

@@ -1145,3 +1145,18 @@ other = "Dimensione: {{.Size}}"
 [update_up_to_date]
 hash = "sha1-a534c74416c491ff56e75a3335ea2ee9b4e5b4ad"
 other = "Hai l'ultima versione ({{.Version}})"
+
+[button_download_missing]
+other = "Download missing"
+
+[download_missing_confirm]
+other = "Download %d missing game(s) for %s?"
+
+[download_missing_done]
+other = "Downloaded %d of %d game(s)."
+
+[download_missing_load_error]
+other = "Failed to load games. Please try again later."
+
+[download_missing_none]
+other = "All games for %s are already downloaded."
