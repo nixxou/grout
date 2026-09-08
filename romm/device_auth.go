@@ -87,6 +87,7 @@ func (c *Client) PollDeviceToken(deviceCode string) (*DeviceAuthTokenResponse, D
 		return nil, DeviceAuthPending, fmt.Errorf("failed to create poll request: %w", err)
 	}
 	req.Header.Set("Content-Type", "application/json")
+	ApplyLiteBoxHeader(req)
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {

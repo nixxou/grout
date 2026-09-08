@@ -94,6 +94,8 @@ func buildTransitionFunc(state *AppState, quitOnBack bool, initialShowCollection
 			return transitionServerAddress(ctx, result)
 		case ScreenInputMapping:
 			return popOrExit(stack)
+		case ScreenVersionPicker:
+			return transitionVersionPicker(ctx, result)
 		}
 
 		return router.ScreenExit, nil
@@ -493,9 +495,10 @@ func transitionGameDetails(ctx *transitionContext, result any) (router.Screen, a
 			Game:     r.Game,
 		}, nil)
 		return ScreenGameOptions, ui.GameOptionsInput{
-			Config: ctx.state.Config,
-			Host:   ctx.state.Host,
-			Game:   r.Game,
+			Config:   ctx.state.Config,
+			Host:     ctx.state.Host,
+			Platform: r.Platform,
+			Game:     r.Game,
 		}
 
 	case ui.GameDetailsActionBack:
@@ -513,9 +516,10 @@ func transitionGameOptions(ctx *transitionContext, result any) (router.Screen, a
 
 	if r.Action == ui.GameOptionsActionShowQR {
 		ctx.stack.Push(ScreenGameOptions, ui.GameOptionsInput{
-			Config: ctx.state.Config,
-			Host:   r.Host,
-			Game:   r.Game,
+			Config:   ctx.state.Config,
+			Host:     r.Host,
+			Platform: r.Platform,
+			Game:     r.Game,
 		}, nil)
 		return ScreenGameQR, ui.GameQRInput{
 			Host: r.Host,
@@ -523,11 +527,28 @@ func transitionGameOptions(ctx *transitionContext, result any) (router.Screen, a
 		}
 	}
 
+	if r.Action == ui.GameOptionsActionVersions {
+		ctx.stack.Push(ScreenGameOptions, ui.GameOptionsInput{
+			Config:   ctx.state.Config,
+			Host:     r.Host,
+			Platform: r.Platform,
+			Game:     r.Game,
+		}, nil)
+		return ScreenVersionPicker, ui.VersionPickerInput{
+			Config:   ctx.state.Config,
+			Host:     r.Host,
+			Platform: r.Platform,
+			Game:     r.Game,
+			Versions: r.Versions,
+		}
+	}
+
 	if r.Action == ui.GameOptionsActionSyncNow {
 		ctx.stack.Push(ScreenGameOptions, ui.GameOptionsInput{
-			Config: ctx.state.Config,
-			Host:   r.Host,
-			Game:   r.Game,
+			Config:   ctx.state.Config,
+			Host:     r.Host,
+			Platform: r.Platform,
+			Game:     r.Game,
 		}, nil)
 		syncInput := ui.SaveSyncInput{
 			Config: ctx.state.Config,
@@ -541,6 +562,45 @@ func transitionGameOptions(ctx *transitionContext, result any) (router.Screen, a
 	}
 
 	return popOrExit(ctx.stack)
+}
+
+// transitionVersionPicker: a switch changes the rom_id this client is served for the game, so the
+// Game Details and Game Options entries pushed on the way in describe a row that no longer exists.
+// Both are dropped, the Game List entry beneath them loses its cached Games (it carries the
+// pre-switch listing, see transitionGameList's pushInput) so it reloads from the refreshed cache,
+// and the details of the NEW row open in their place: B from there lands on a fresh list.
+func transitionVersionPicker(ctx *transitionContext, result any) (router.Screen, any) {
+	r := result.(ui.VersionPickerOutput)
+
+	if r.Action != ui.VersionPickerActionSwitched {
+		return popOrExit(ctx.stack)
+	}
+
+	for {
+		entry := ctx.stack.Peek()
+		if entry == nil {
+			break
+		}
+		if entry.Screen != ScreenGameOptions && entry.Screen != ScreenGameDetails {
+			break
+		}
+		ctx.stack.Pop()
+	}
+
+	if entry := ctx.stack.Peek(); entry != nil && entry.Screen == ScreenGameList {
+		if input, ok := entry.Input.(ui.GameListInput); ok {
+			ctx.stack.Pop()
+			input.Games = nil
+			ctx.stack.Push(ScreenGameList, input, entry.Resume)
+		}
+	}
+
+	return ScreenGameDetails, ui.GameDetailsInput{
+		Config:   ctx.state.Config,
+		Host:     ctx.state.Host,
+		Platform: r.Platform,
+		Game:     r.Game,
+	}
 }
 
 func transitionCollectionList(ctx *transitionContext, result any) (router.Screen, any) {

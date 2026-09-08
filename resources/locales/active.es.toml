@@ -1160,3 +1160,39 @@ other = "Failed to load games. Please try again later."
 
 [download_missing_none]
 other = "All games for %s are already downloaded."
+
+[game_options_versions]
+other = "Versiones (%d)"
+
+[version_picker_loading]
+other = "Cargando versiones..."
+
+[version_picker_loading_roms]
+other = "Cargando roms..."
+
+[version_picker_switch]
+other = "Cambiar"
+
+[version_picker_switch_delete]
+other = "Cambiar y borrar antiguo"
+
+[version_picker_rom_count]
+other = " (%d roms)"
+
+[version_picker_archive]
+other = " (archivo)"
+
+[version_picker_delete_confirm]
+other = "¿Cambiar de versión y borrar los archivos locales de %s?"
+
+[version_picker_switching]
+other = "Cambiando de versión..."
+
+[version_picker_switch_error]
+other = "No se pudo cambiar de versión. Inténtalo de nuevo."
+
+[version_picker_deleted]
+other = "%d archivo(s) local(es) borrado(s)."
+
+[version_picker_load_error]
+other = "No se pudieron cargar las versiones. Inténtalo más tarde."

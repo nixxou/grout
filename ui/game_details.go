@@ -320,6 +320,7 @@ func (s *GameDetailsScreen) fetchImageFromURL(host romm.Host, imageURL string) [
 	}
 
 	req.Header.Set("Authorization", host.AuthHeader())
+	romm.ApplyLiteBoxHeader(req)
 
 	client := &http.Client{Timeout: internal.DefaultHTTPTimeout}
 	resp, err := client.Do(req)

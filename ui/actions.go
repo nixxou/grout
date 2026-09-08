@@ -40,6 +40,14 @@ const (
 	GameOptionsActionShowQR
 	GameOptionsActionBack
 	GameOptionsActionSyncNow
+	GameOptionsActionVersions
+)
+
+type VersionPickerAction int
+
+const (
+	VersionPickerActionBack VersionPickerAction = iota
+	VersionPickerActionSwitched
 )
 
 type SearchAction int

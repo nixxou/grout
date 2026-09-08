@@ -108,6 +108,7 @@ func (c *Client) doRequest(method string, path string, queryParams queryParam, b
 	if c.authHeader != "" {
 		req.Header.Set("Authorization", c.authHeader)
 	}
+	ApplyLiteBoxHeader(req)
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
@@ -153,6 +154,7 @@ func (c *Client) doRequestRaw(method, path string, body interface{}) ([]byte, er
 	if c.authHeader != "" {
 		req.Header.Set("Authorization", c.authHeader)
 	}
+	ApplyLiteBoxHeader(req)
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
@@ -190,6 +192,7 @@ func (c *Client) doRequestRawWithQuery(method, path string, queryParams queryPar
 	if c.authHeader != "" {
 		req.Header.Set("Authorization", c.authHeader)
 	}
+	ApplyLiteBoxHeader(req)
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
@@ -221,6 +224,7 @@ func (c *Client) doMultipartRequest(method, path string, queryParams queryParam,
 	if c.authHeader != "" {
 		req.Header.Set("Authorization", c.authHeader)
 	}
+	ApplyLiteBoxHeader(req)
 
 	if queryParams != nil && queryParams.Valid() {
 		values, err := qs.NewEncoder().Values(queryParams)

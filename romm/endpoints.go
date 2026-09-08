@@ -39,4 +39,10 @@ const (
 
 	endpointDeviceAuthInit  = "/api/auth/device/init"
 	endpointDeviceAuthToken = "/api/auth/device/token"
+
+	// LiteBox-only extensions (RommLiteBoxApi.cs) — a stock RomM answers 404 here.
+	endpointLiteBoxCapabilities = "/api/litebox/capabilities"
+	endpointLiteBoxVersions     = "/api/litebox/roms/%d/versions"
+	endpointLiteBoxVersionRoms  = "/api/litebox/roms/%d/versions/%s/roms"
+	endpointLiteBoxPin          = "/api/litebox/roms/%d/pin"
 )

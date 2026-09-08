@@ -2,6 +2,7 @@ package ui
 
 import (
 	"errors"
+	"fmt"
 	"grout/internal"
 	"grout/romm"
 
@@ -11,17 +12,22 @@ import (
 )
 
 type GameOptionsInput struct {
-	Config *internal.Config
-	Host   romm.Host
-	Game   romm.Rom
+	Config   *internal.Config
+	Host     romm.Host
+	Platform romm.Platform
+	Game     romm.Rom
 }
 
 type GameOptionsOutput struct {
 	Action      GameOptionsAction
 	Config      *internal.Config
 	Host        romm.Host
+	Platform    romm.Platform
 	Game        romm.Rom
 	NewSlotName string // Set when a new slot is created (for targeted upload)
+	// Versions is filled for GameOptionsActionVersions: the list already fetched to decide whether
+	// the entry shows at all, handed to the picker so it does not ask the server twice.
+	Versions []romm.LiteBoxVersion
 }
 
 type GameOptionsScreen struct{}
@@ -32,16 +38,19 @@ func NewGameOptionsScreen() *GameOptionsScreen {
 
 func (s *GameOptionsScreen) Draw(input GameOptionsInput) (GameOptionsOutput, error) {
 	config := input.Config
-	output := GameOptionsOutput{Action: GameOptionsActionBack, Config: config, Host: input.Host, Game: input.Game}
+	output := GameOptionsOutput{Action: GameOptionsActionBack, Config: config, Host: input.Host, Platform: input.Platform, Game: input.Game}
 
-	// Fetch save summary to determine available slots
+	// Fetch save summary to determine available slots, and, on a LiteBox server, the versions the
+	// game could be served as. The capabilities probe behind SupportsLiteBoxVersionSwitch is one
+	// request per server for the life of the process (a stock RomM answers 404 once, then nothing).
 	var slotNames []string
-	if input.Host.DeviceID != "" {
-		client := romm.NewClientFromHost(input.Host, config.ApiTimeout.Duration())
-		gaba.ProcessMessage(
-			i18n.Localize(&goi18n.Message{ID: "synced_games_loading_detail", Other: "Loading save details..."}, nil),
-			gaba.ProcessMessageOptions{ShowThemeBackground: true},
-			func() (any, error) {
+	var versions []romm.LiteBoxVersion
+	client := romm.NewClientFromHost(input.Host, config.ApiTimeout.Duration())
+	gaba.ProcessMessage(
+		i18n.Localize(&goi18n.Message{ID: "synced_games_loading_detail", Other: "Loading save details..."}, nil),
+		gaba.ProcessMessageOptions{ShowThemeBackground: true},
+		func() (any, error) {
+			if input.Host.DeviceID != "" {
 				summary, err := client.GetSaveSummary(input.Game.ID)
 				if err == nil {
 					for _, slot := range summary.Slots {
@@ -52,10 +61,17 @@ func (s *GameOptionsScreen) Draw(input GameOptionsInput) (GameOptionsOutput, err
 						slotNames = append(slotNames, name)
 					}
 				}
-				return nil, nil
-			},
-		)
-	}
+			}
+			if client.SupportsLiteBoxVersionSwitch() {
+				if v, err := client.GetLiteBoxVersions(input.Game.ID); err == nil {
+					versions = v
+				} else {
+					gaba.GetLogger().Warn("LiteBox versions fetch failed", "game", input.Game.Name, "error", err)
+				}
+			}
+			return nil, nil
+		},
+	)
 
 	oldSlotPref := config.GetSlotPreference(input.Game.ID)
 
@@ -67,6 +83,23 @@ func (s *GameOptionsScreen) Draw(input GameOptionsInput) (GameOptionsOutput, err
 		Options:        []gaba.Option{{DisplayName: "", Value: "show_qr", Type: gaba.OptionTypeClickable}},
 		SelectedOption: 0,
 	})
+
+	// LiteBox only (RommLiteBoxApi.cs): worth an entry when there is something to choose, i.e.
+	// several versions, or a single eligible archive whose roms are the choice (the picker then
+	// opens straight on them). One version served whole has nothing to switch to. Last on purpose,
+	// below the stock entries.
+	versionsText := ""
+	if hasVersionChoice(versions) {
+		versionsText = fmt.Sprintf(
+			i18n.Localize(&goi18n.Message{ID: "game_options_versions", Other: "Versions (%d)"}, nil),
+			versionChoiceCount(versions),
+		)
+		items = append(items, gaba.ItemWithOptions{
+			Item:           gaba.MenuItem{Text: versionsText},
+			Options:        []gaba.Option{{DisplayName: "", Value: "versions", Type: gaba.OptionTypeClickable}},
+			SelectedOption: 0,
+		})
+	}
 
 	title := i18n.Localize(&goi18n.Message{ID: "game_options_title", Other: "Game Options"}, nil)
 
@@ -94,6 +127,11 @@ func (s *GameOptionsScreen) Draw(input GameOptionsInput) (GameOptionsOutput, err
 			selectedItem := result.Items[result.Selected]
 			if selectedItem.Item.Text == showQRText {
 				output.Action = GameOptionsActionShowQR
+				return output, nil
+			}
+			if versionsText != "" && selectedItem.Item.Text == versionsText {
+				output.Action = GameOptionsActionVersions
+				output.Versions = versions
 				return output, nil
 			}
 		}
@@ -124,6 +162,28 @@ func (s *GameOptionsScreen) Draw(input GameOptionsInput) (GameOptionsOutput, err
 		output.Action = GameOptionsActionSaved
 	}
 	return output, nil
+}
+
+// hasVersionChoice is Argosy's rule (GameDetailViewModel.refreshLiteBoxVersionsInBackground).
+func hasVersionChoice(versions []romm.LiteBoxVersion) bool {
+	if len(versions) > 1 {
+		return true
+	}
+	for _, v := range versions {
+		if v.Eligible {
+			return true
+		}
+	}
+	return false
+}
+
+// versionChoiceCount: the number of versions, or, for a lone eligible archive, its rom count when
+// the server knows it.
+func versionChoiceCount(versions []romm.LiteBoxVersion) int {
+	if len(versions) == 1 && versions[0].Eligible && versions[0].RomCount != nil {
+		return *versions[0].RomCount
+	}
+	return len(versions)
 }
 
 func (s *GameOptionsScreen) buildMenuItems(config *internal.Config, game romm.Rom, deviceRegistered bool, slotNames []string) []gaba.ItemWithOptions {

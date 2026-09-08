@@ -1160,3 +1160,39 @@ other = "Failed to load games. Please try again later."
 
 [download_missing_none]
 other = "All games for %s are already downloaded."
+
+[game_options_versions]
+other = "Versões (%d)"
+
+[version_picker_loading]
+other = "Carregando versões..."
+
+[version_picker_loading_roms]
+other = "Carregando roms..."
+
+[version_picker_switch]
+other = "Trocar"
+
+[version_picker_switch_delete]
+other = "Trocar e apagar antigo"
+
+[version_picker_rom_count]
+other = " (%d roms)"
+
+[version_picker_archive]
+other = " (arquivo)"
+
+[version_picker_delete_confirm]
+other = "Trocar de versão e apagar os arquivos locais de %s?"
+
+[version_picker_switching]
+other = "Trocando de versão..."
+
+[version_picker_switch_error]
+other = "Não foi possível trocar de versão. Tente novamente."
+
+[version_picker_deleted]
+other = "%d arquivo(s) local(is) apagado(s)."
+
+[version_picker_load_error]
+other = "Falha ao carregar as versões. Tente novamente mais tarde."

@@ -99,6 +99,7 @@ func (s *DownloadScreen) draw(input DownloadInput) (DownloadOutput, error) {
 
 	headers := make(map[string]string)
 	headers["Authorization"] = input.Host.AuthHeader()
+	headers[romm.LiteBoxClientHeader] = romm.LiteBoxClientValue()
 
 	slices.SortFunc(downloads, func(a, b gaba.Download) int {
 		return strings.Compare(strings.ToLower(a.DisplayName), strings.ToLower(b.DisplayName))

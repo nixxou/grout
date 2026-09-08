@@ -51,6 +51,7 @@ func (c *Client) ValidateConnection() error {
 	if err != nil {
 		return ClassifyError(fmt.Errorf("failed to create validation request: %w", err))
 	}
+	ApplyLiteBoxHeader(req)
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {

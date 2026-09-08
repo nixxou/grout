@@ -38,4 +38,5 @@ const (
 	ScreenServerAddress
 	ScreenToolsSettings
 	ScreenInputMapping
+	ScreenVersionPicker
 )

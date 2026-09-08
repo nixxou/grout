@@ -1160,3 +1160,39 @@ other = "Échec du chargement des jeux. Veuillez réessayer plus tard."
 
 [download_missing_none]
 other = "Tous les jeux de %s sont déjà téléchargés."
+
+[game_options_versions]
+other = "Versions (%d)"
+
+[version_picker_loading]
+other = "Chargement des versions..."
+
+[version_picker_loading_roms]
+other = "Chargement des roms..."
+
+[version_picker_switch]
+other = "Basculer"
+
+[version_picker_switch_delete]
+other = "Basculer et effacer l'ancien"
+
+[version_picker_rom_count]
+other = " (%d roms)"
+
+[version_picker_archive]
+other = " (archive)"
+
+[version_picker_delete_confirm]
+other = "Basculer de version et effacer les fichiers locaux de %s ?"
+
+[version_picker_switching]
+other = "Changement de version..."
+
+[version_picker_switch_error]
+other = "Impossible de changer de version. Veuillez réessayer."
+
+[version_picker_deleted]
+other = "%d fichier(s) local(aux) effacé(s)."
+
+[version_picker_load_error]
+other = "Échec du chargement des versions. Veuillez réessayer plus tard."

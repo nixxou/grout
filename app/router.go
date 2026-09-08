@@ -244,4 +244,9 @@ func registerScreens(r *router.Router, state *AppState) {
 		return nil, nil
 	})
 
+	r.Register(ScreenVersionPicker, func(input any) (any, error) {
+		screen := ui.NewVersionPickerScreen()
+		return screen.Draw(input.(ui.VersionPickerInput))
+	})
+
 }

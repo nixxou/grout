@@ -1160,3 +1160,39 @@ other = "Failed to load games. Please try again later."
 
 [download_missing_none]
 other = "All games for %s are already downloaded."
+
+[game_options_versions]
+other = "Версии (%d)"
+
+[version_picker_loading]
+other = "Загрузка версий..."
+
+[version_picker_loading_roms]
+other = "Загрузка ромов..."
+
+[version_picker_switch]
+other = "Переключить"
+
+[version_picker_switch_delete]
+other = "Переключить и удалить старый"
+
+[version_picker_rom_count]
+other = " (%d ромов)"
+
+[version_picker_archive]
+other = " (архив)"
+
+[version_picker_delete_confirm]
+other = "Переключить версию и удалить локальные файлы %s?"
+
+[version_picker_switching]
+other = "Переключение версии..."
+
+[version_picker_switch_error]
+other = "Не удалось переключить версию. Попробуйте ещё раз."
+
+[version_picker_deleted]
+other = "Удалено локальных файлов: %d."
+
+[version_picker_load_error]
+other = "Не удалось загрузить версии. Попробуйте позже."

@@ -139,6 +139,7 @@ func DownloadAndCacheArtwork(rom romm.Rom, kind artutil.ArtKind, host romm.Host)
 		return fmt.Errorf("failed to create request: %w", err)
 	}
 	req.Header.Set("Authorization", host.AuthHeader())
+	romm.ApplyLiteBoxHeader(req)
 
 	client := &http.Client{Timeout: romm.DefaultClientTimeout}
 	resp, err := client.Do(req)

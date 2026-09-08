@@ -1356,3 +1356,42 @@ func (cm *Manager) PurgeDeletedGames(validIDs []int) (int64, error) {
 
 	return deleted, nil
 }
+
+// DeleteGame removes ONE cached game and everything hanging off it (junction tables,
+// game_collections, game_basenames). Used when the server stops serving a rom_id to this client
+// — a LiteBox version switch retires the old id on the spot — so the stale row does not linger in
+// the game list until the next incremental sync's purge (PurgeDeletedGames, which is global and
+// cannot be pointed at a single id).
+func (cm *Manager) DeleteGame(gameID int) error {
+	if cm == nil || !cm.initialized {
+		return ErrNotInitialized
+	}
+
+	cm.mu.Lock()
+	defer cm.mu.Unlock()
+
+	tx, err := cm.db.Begin()
+	if err != nil {
+		return newCacheError("delete", "games", strconv.Itoa(gameID), err)
+	}
+	defer tx.Rollback()
+
+	for _, table := range junctionTables {
+		if _, err := tx.Exec("DELETE FROM "+table+" WHERE game_id = ?", gameID); err != nil {
+			return newCacheError("delete", "games", table, err)
+		}
+	}
+	for _, table := range []string{"game_collections", "game_basenames"} {
+		if _, err := tx.Exec("DELETE FROM "+table+" WHERE game_id = ?", gameID); err != nil {
+			return newCacheError("delete", "games", table, err)
+		}
+	}
+	if _, err := tx.Exec("DELETE FROM games WHERE id = ?", gameID); err != nil {
+		return newCacheError("delete", "games", strconv.Itoa(gameID), err)
+	}
+
+	if err := tx.Commit(); err != nil {
+		return newCacheError("delete", "games", strconv.Itoa(gameID), err)
+	}
+	return nil
+}

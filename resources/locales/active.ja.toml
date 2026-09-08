@@ -1160,3 +1160,39 @@ other = "Failed to load games. Please try again later."
 
 [download_missing_none]
 other = "All games for %s are already downloaded."
+
+[game_options_versions]
+other = "バージョン (%d)"
+
+[version_picker_loading]
+other = "バージョンを読み込み中..."
+
+[version_picker_loading_roms]
+other = "ROMを読み込み中..."
+
+[version_picker_switch]
+other = "切り替え"
+
+[version_picker_switch_delete]
+other = "切り替えて旧版を削除"
+
+[version_picker_rom_count]
+other = " (%d ROM)"
+
+[version_picker_archive]
+other = " (アーカイブ)"
+
+[version_picker_delete_confirm]
+other = "バージョンを切り替えて %s のローカルファイルを削除しますか？"
+
+[version_picker_switching]
+other = "バージョンを切り替え中..."
+
+[version_picker_switch_error]
+other = "バージョンを切り替えられませんでした。もう一度お試しください。"
+
+[version_picker_deleted]
+other = "ローカルファイルを %d 件削除しました。"
+
+[version_picker_load_error]
+other = "バージョンを読み込めませんでした。後でもう一度お試しください。"
