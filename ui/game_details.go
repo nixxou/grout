@@ -160,6 +160,14 @@ func (s *GameDetailsScreen) Draw(input GameDetailsInput) (GameDetailsOutput, err
 	return output, nil
 }
 
+// servedFileName is the file this row downloads as: the first served file, else the rom's own name.
+func servedFileName(game romm.Rom) string {
+	if !game.HasMultipleFiles && len(game.Files) > 0 && game.Files[0].FileName != "" {
+		return game.Files[0].FileName
+	}
+	return game.FsName
+}
+
 func (s *GameDetailsScreen) buildSections(input GameDetailsInput) []gaba.Section {
 	sections := make([]gaba.Section, 0)
 	game := input.Game
@@ -170,6 +178,12 @@ func (s *GameDetailsScreen) buildSections(input GameDetailsInput) []gaba.Section
 		sections = append(sections, gaba.NewImageSection("", coverImagePath, 640, 480, constants.TextAlignCenter))
 	} else {
 		logger.Debug("No cover image available", "game", game.Name)
+	}
+
+	// The served file's name right under the cover, above the description — what tells two versions
+	// of one game apart at a glance once a version switch is possible (same placement as Argosy).
+	if fileName := servedFileName(game); fileName != "" {
+		sections = append(sections, gaba.NewDescriptionSection("", fileName))
 	}
 
 	// Show file selection dropdown for games with nested single file (multiple versions)
